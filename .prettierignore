@@ -1,0 +1,16 @@
+# Ignore artifacts
+/node_modules
+/.next/
+/out/
+/build
+
+# Ignore package manager lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Ignore secrets
+.env*
+
+# Ignore database files
+*.db
