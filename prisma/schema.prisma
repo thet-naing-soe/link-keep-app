@@ -1,0 +1,85 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  // output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// --- User Model (for authentication and associating bookmarks) ---
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+
+  // Relationships (for NextAuth.js authentication)
+  accounts Account[] // User can have multiple authentication accounts (e.g., GitHub, Google)
+  sessions Session[] // User can have multiple active sessions
+
+  // Relationship (for our Bookmark app)
+  bookmarks Bookmark[] // A user can have multiple bookmarks
+}
+
+// --- Bookmark Model (for our LinkKeep app's core data) ---
+model Bookmark {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  url         String
+  createdAt   DateTime @default(now()) // When the bookmark was created (auto-generated)
+  updatedAt   DateTime @updatedAt // When the bookmark was last updated (auto-generated)
+
+  // Relationship: Each bookmark belongs to one user
+  userId String // Foreign key to User model
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade) // Link to User model
+
+  @@index([userId]) // Create an index on userId for faster queries
+}
+
+// --- NextAuth.js (Auth.js) Required Models ---
+// These models are essential for NextAuth.js to manage user authentication sessions and accounts.
+// They are automatically handled by NextAuth.js's Prisma Adapter.
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
