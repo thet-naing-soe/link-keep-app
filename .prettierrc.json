@@ -7,8 +7,5 @@
   "bracketSpacing": true,
   "jsxSingleQuote": false,
   "arrowParens": "always",
-  "plugins": [
-    "prettier-plugin-tailwindcss",
-    "prettier-plugin-prisma"
-  ]
+  "plugins": ["prettier-plugin-tailwindcss", "prettier-plugin-prisma"]
 }
