@@ -3,5 +3,5 @@ export type Bookmark = {
   title: string;
   url: string;
   description?: string;
-  createdAt: Date;
+  createdAt: string;
 };

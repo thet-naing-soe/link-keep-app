@@ -1,10 +1,10 @@
 import NextAuth from 'next-auth';
 import GitHub from 'next-auth/providers/github';
 import { PrismaAdapter } from '@auth/prisma-adapter';
-import { db } from '@/lib/db';
+import { prisma } from '@/lib/prisma';
 
-export const { handlers, signIn, signOut, auth } = NextAuth({
-  adapter: PrismaAdapter(db),
+const authOptions = {
+  adapter: PrismaAdapter(prisma),
 
   providers: [
     GitHub({
@@ -35,4 +35,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     maxAge: 30 * 24 * 60 * 60,
   },
   secret: process.env.AUTH_SECRET,
-});
+};
+
+export const { handlers, signIn, signOut, auth } = NextAuth(authOptions);
+
+export const { GET, POST, PUT, DELETE } = handlers;
