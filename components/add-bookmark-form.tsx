@@ -4,12 +4,14 @@ import * as React from 'react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import {
   type CreateBookmarkInput,
   createBookmarkSchema,
 } from '@/lib/validators';
 import { z } from 'zod';
+import { useBookmarkStore } from '@/lib/store/bookmark-store';
 
 export default function AddBookmarkForm() {
   const [title, setTitle] = useState('');
@@ -18,6 +20,8 @@ export default function AddBookmarkForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  const addBookmark = useBookmarkStore((state) => state.addBookmark);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,7 +49,7 @@ export default function AddBookmarkForm() {
         setTitle('');
         setUrl('');
         setDescription('');
-        // TODO: Later: Update the bookmark list on the page directly (without page refresh)
+        addBookmark(newBookmark);
       } else {
         const errorData = await res.json();
         setError(
@@ -75,12 +79,12 @@ export default function AddBookmarkForm() {
       {success && <p className="text-sm text-green-500">{success}</p>}
 
       <div>
-        <label
+        <Label
           htmlFor="title"
           className="mb-1 block text-sm font-medium text-foreground"
         >
           Title
-        </label>
+        </Label>
         <Input
           id="title"
           type="text"
@@ -91,12 +95,12 @@ export default function AddBookmarkForm() {
         />
       </div>
       <div>
-        <label
+        <Label
           htmlFor="url"
           className="mb-1 block text-sm font-medium text-foreground"
         >
           URL
-        </label>
+        </Label>
         <Input
           id="url"
           type="url"
@@ -107,12 +111,12 @@ export default function AddBookmarkForm() {
         />
       </div>
       <div>
-        <label
+        <Label
           htmlFor="description"
           className="mb-1 block text-sm font-medium text-foreground"
         >
           Description (Optional)
-        </label>
+        </Label>
         <Textarea
           id="description"
           value={description}
