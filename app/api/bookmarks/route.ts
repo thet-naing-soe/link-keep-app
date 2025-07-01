@@ -33,3 +33,26 @@ export async function POST(req: Request) {
     return new NextResponse('Internal Server Error', { status: 500 });
   }
 }
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function GET(_req: Request) {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return new NextResponse('Unauthorized', { status: 401 });
+    }
+
+    const bookmarks = await prisma.bookmark.findMany({
+      where: { userId: session.user.id },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return NextResponse.json(bookmarks);
+  } catch (error: unknown) {
+    console.error('Error fetching bookmarks:', error);
+    return new NextResponse(
+      'Failed to fetch bookmarks due to a server error.',
+      { status: 500 }
+    );
+  }
+}

@@ -8,6 +8,8 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { SessionProvider } from 'next-auth/react';
 import { auth } from '@/app/api/auth/[...nextauth]/route';
 
+import QueryProvider from '@/components/query-provider';
+
 export const metadata: Metadata = {
   title: 'LinkKeep',
   description:
@@ -24,16 +26,18 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={cn(`${inter.variable} antialiased`)}>
-        <SessionProvider session={session}>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            {children}
-          </ThemeProvider>
-        </SessionProvider>
+        <QueryProvider>
+          <SessionProvider session={session}>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              {children}
+            </ThemeProvider>
+          </SessionProvider>
+        </QueryProvider>
       </body>
     </html>
   );

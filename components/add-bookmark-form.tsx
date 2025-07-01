@@ -11,23 +11,56 @@ import {
   createBookmarkSchema,
 } from '@/lib/validators';
 import { z } from 'zod';
-import { useBookmarkStore } from '@/lib/store/bookmark-store';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { Bookmark } from '@prisma/client';
+
+const createBookmark = async (newBookmarkData: CreateBookmarkInput) => {
+  const res = await fetch('/api/bookmarks', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(newBookmarkData),
+  });
+  if (!res.ok) {
+    const errorData = await res
+      .json()
+      .catch(() => ({ message: 'Failed to create bookmark' }));
+    throw new Error(errorData.message || 'Failed to create bookmark');
+  }
+  return res.json();
+};
 
 export default function AddBookmarkForm() {
   const [title, setTitle] = useState('');
   const [url, setUrl] = useState('');
   const [description, setDescription] = useState('');
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const queryClient = useQueryClient();
 
-  const addBookmark = useBookmarkStore((state) => state.addBookmark);
-
+  const {
+    mutate,
+    isPending,
+    isError: isMutationError,
+    isSuccess: isMutationSuccess,
+    error: mutationError,
+  } = useMutation<Bookmark, Error, CreateBookmarkInput>({
+    mutationFn: createBookmark,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    onSuccess: (_data) => {
+      queryClient.invalidateQueries({ queryKey: ['bookmarks'] });
+      setTitle('');
+      setUrl('');
+      setDescription('');
+      setError('');
+    },
+    onError: (err) => {
+      setError(
+        err.message || 'Failed to add bookmark via API. Please try again.'
+      );
+    },
+  });
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError('');
-    setSuccess('');
 
     try {
       const formData: CreateBookmarkInput = {
@@ -36,34 +69,13 @@ export default function AddBookmarkForm() {
         description: description || undefined,
       };
       createBookmarkSchema.parse(formData);
-
-      const res = await fetch('/api/bookmarks', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-
-      if (res.ok) {
-        const newBookmark = await res.json();
-        setSuccess('Bookmark added successfully!');
-        setTitle('');
-        setUrl('');
-        setDescription('');
-        addBookmark(newBookmark);
-      } else {
-        const errorData = await res.json();
-        setError(
-          errorData.message || 'Failed to add bookmark. Please try again.'
-        );
-      }
+      mutate(formData);
     } catch (err: unknown) {
       if (err instanceof z.ZodError) {
         setError(err.errors[0].message);
       } else {
         setError('An unexpected error occurred. Please check your input.');
       }
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -75,8 +87,14 @@ export default function AddBookmarkForm() {
       <h2 className="text-2xl font-semibold text-card-foreground">
         Add New Bookmark
       </h2>
-      {error && <p className="text-sm text-destructive">{error}</p>}
-      {success && <p className="text-sm text-green-500">{success}</p>}
+      {(error || isMutationError) && (
+        <p className="text-sm text-destructive">
+          {error || mutationError?.message || 'Failed to add bookmark.'}
+        </p>
+      )}
+      {isMutationSuccess && (
+        <p className="text-sm text-green-500">Bookmark added successfully!</p>
+      )}
 
       <div>
         <Label
@@ -125,8 +143,8 @@ export default function AddBookmarkForm() {
           rows={3}
         />
       </div>
-      <Button type="submit" disabled={loading}>
-        {loading ? 'Adding...' : 'Add Bookmark'}
+      <Button type="submit" disabled={isPending}>
+        {isPending ? 'Adding...' : 'Add Bookmark'}
       </Button>
     </form>
   );
