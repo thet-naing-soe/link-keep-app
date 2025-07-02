@@ -1,18 +1,25 @@
 'use client';
 
-import * as React from 'react';
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import {
   type CreateBookmarkInput,
   createBookmarkSchema,
 } from '@/lib/validators';
-import { z } from 'zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Bookmark } from '@prisma/client';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useNotificationStore } from '@/lib/store/notification-store';
 
 const createBookmark = async (newBookmarkData: CreateBookmarkInput) => {
   const res = await fetch('/api/bookmarks', {
@@ -30,122 +37,114 @@ const createBookmark = async (newBookmarkData: CreateBookmarkInput) => {
 };
 
 export default function AddBookmarkForm() {
-  const [title, setTitle] = useState('');
-  const [url, setUrl] = useState('');
-  const [description, setDescription] = useState('');
-  const [error, setError] = useState('');
-  const queryClient = useQueryClient();
+  const form = useForm<CreateBookmarkInput>({
+    resolver: zodResolver(createBookmarkSchema),
+    defaultValues: {
+      title: '',
+      url: '',
+      description: '',
+    },
+  });
 
-  const {
-    mutate,
-    isPending,
-    isError: isMutationError,
-    isSuccess: isMutationSuccess,
-    error: mutationError,
-  } = useMutation<Bookmark, Error, CreateBookmarkInput>({
+  const queryClient = useQueryClient();
+  const showNotification = useNotificationStore(
+    (state) => state.showNotification
+  );
+
+  const { mutate, isPending } = useMutation<
+    Bookmark,
+    Error,
+    CreateBookmarkInput
+  >({
     mutationFn: createBookmark,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     onSuccess: (_data) => {
       queryClient.invalidateQueries({ queryKey: ['bookmarks'] });
-      setTitle('');
-      setUrl('');
-      setDescription('');
-      setError('');
+      form.reset();
+      showNotification('Bookmark added successfully!', 'success');
     },
     onError: (err) => {
-      setError(
-        err.message || 'Failed to add bookmark via API. Please try again.'
+      showNotification(
+        err.message || 'Failed to add bookmark via API. Please try again.',
+        'error'
       );
     },
   });
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
 
-    try {
-      const formData: CreateBookmarkInput = {
-        title,
-        url,
-        description: description || undefined,
-      };
-      createBookmarkSchema.parse(formData);
-      mutate(formData);
-    } catch (err: unknown) {
-      if (err instanceof z.ZodError) {
-        setError(err.errors[0].message);
-      } else {
-        setError('An unexpected error occurred. Please check your input.');
-      }
-    }
+  const onSubmit = (data: CreateBookmarkInput) => {
+    mutate(data);
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="space-y-4 rounded-lg border bg-card p-6 shadow-md"
-    >
-      <h2 className="text-2xl font-semibold text-card-foreground">
-        Add New Bookmark
-      </h2>
-      {(error || isMutationError) && (
-        <p className="text-sm text-destructive">
-          {error || mutationError?.message || 'Failed to add bookmark.'}
-        </p>
-      )}
-      {isMutationSuccess && (
-        <p className="text-sm text-green-500">Bookmark added successfully!</p>
-      )}
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-4 rounded-lg border bg-card p-6 shadow-md"
+      >
+        <h2 className="text-2xl font-semibold text-card-foreground">
+          Add New Bookmark
+        </h2>
 
-      <div>
-        <Label
-          htmlFor="title"
-          className="mb-1 block text-sm font-medium text-foreground"
-        >
-          Title
-        </Label>
-        <Input
-          id="title"
-          type="text"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="e.g., Next.js Docs"
-          required
+        {/* Title Field */}
+        <FormField
+          control={form.control}
+          name="title"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Title</FormLabel>
+              <FormControl>
+                <Input
+                  type="text"
+                  placeholder="e.g., Next.js Docs"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
-      <div>
-        <Label
-          htmlFor="url"
-          className="mb-1 block text-sm font-medium text-foreground"
-        >
-          URL
-        </Label>
-        <Input
-          id="url"
-          type="url"
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-          placeholder="e.g., https://nextjs.org/docs"
-          required
+
+        {/* URL Field */}
+        <FormField
+          control={form.control}
+          name="url"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>URL</FormLabel>
+              <FormControl>
+                <Input
+                  type="url"
+                  placeholder="e.g., https://nextjs.org/docs"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
-      <div>
-        <Label
-          htmlFor="description"
-          className="mb-1 block text-sm font-medium text-foreground"
-        >
-          Description (Optional)
-        </Label>
-        <Textarea
-          id="description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder="A brief description of the bookmark."
-          rows={3}
+
+        {/* Description Field */}
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Description (Optional)</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="A brief description of the bookmark."
+                  rows={3}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
-      <Button type="submit" disabled={isPending}>
-        {isPending ? 'Adding...' : 'Add Bookmark'}
-      </Button>
-    </form>
+        <Button type="submit" disabled={isPending}>
+          {isPending ? 'Adding...' : 'Add Bookmark'}
+        </Button>
+      </form>
+    </Form>
   );
 }

@@ -10,6 +10,9 @@ import { auth } from '@/app/api/auth/[...nextauth]/route';
 
 import QueryProvider from '@/components/query-provider';
 
+import { Toaster } from '@/components/ui/sonner';
+import { ConfirmationDialog } from '@/components/confirmation-dialog';
+
 export const metadata: Metadata = {
   title: 'LinkKeep',
   description:
@@ -38,6 +41,8 @@ export default async function RootLayout({
             </ThemeProvider>
           </SessionProvider>
         </QueryProvider>
+        <Toaster />
+        <ConfirmationDialog />
       </body>
     </html>
   );

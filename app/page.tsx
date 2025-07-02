@@ -1,7 +1,6 @@
 import { ThemeToggle } from '@/components/theme-toggle';
 import LoginButton from '@/components/login-button';
 import AddBookmarkForm from '@/components/add-bookmark-form';
-import BookmarkInitializer from '@/components/bookmark-initializer';
 import BookmarkListDisplay from '@/components/bookmark-list-display';
 
 import { auth } from '@/app/api/auth/[...nextauth]/route';
@@ -15,7 +14,6 @@ export default async function HomePage() {
         <LoginButton />
         <ThemeToggle />
       </header>
-      <BookmarkInitializer initialBookmarks={[]} />
       <main className="flex min-h-screen flex-col items-center justify-center py-12">
         <div className="mb-8 text-center">
           <h1 className="text-5xl font-bold tracking-tight">
