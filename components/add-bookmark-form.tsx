@@ -20,6 +20,7 @@ import { Bookmark } from '@prisma/client';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNotificationStore } from '@/lib/store/notification-store';
+import { Loader2 } from 'lucide-react';
 
 const createBookmark = async (newBookmarkData: CreateBookmarkInput) => {
   const res = await fetch('/api/bookmarks', {
@@ -142,7 +143,14 @@ export default function AddBookmarkForm() {
           )}
         />
         <Button type="submit" disabled={isPending}>
-          {isPending ? 'Adding...' : 'Add Bookmark'}
+          {isPending ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Adding...
+            </>
+          ) : (
+            'Add Bookmark'
+          )}
         </Button>
       </form>
     </Form>

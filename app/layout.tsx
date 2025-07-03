@@ -17,6 +17,14 @@ export const metadata: Metadata = {
   title: 'LinkKeep',
   description:
     'A modern, clean, and professional full-stack bookmark application built with Next.js 14, Shadcn UI, and more.',
+  icons: {
+    icon: [
+      {
+        url: '/bookmark-icon.svg',
+        type: 'image/svg+xml',
+      },
+    ],
+  },
 };
 
 export default async function RootLayout({
