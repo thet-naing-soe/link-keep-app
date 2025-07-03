@@ -1,30 +1,24 @@
 import NextAuth from 'next-auth';
-import type { NextAuthConfig } from 'next-auth'; // Keep this type import
-import GitHub from 'next-auth/providers/github';
 import { PrismaAdapter } from '@auth/prisma-adapter';
+import GitHub from 'next-auth/providers/github';
 import { prisma } from '@/lib/prisma';
 
-import type { JWT } from 'next-auth/jwt';
-import type { Session, User as AdapterUser } from 'next-auth';
-
-const authOptions: NextAuthConfig = {
+export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma),
-
   providers: [
     GitHub({
       clientId: process.env.AUTH_GITHUB_ID as string,
       clientSecret: process.env.AUTH_GITHUB_SECRET as string,
     }),
   ],
-
   callbacks: {
-    async session({ session, token }: { session: Session; token: JWT }) {
+    async session({ session, token }) {
       if (session.user && token && token.id) {
         session.user.id = token.id as string;
       }
       return session;
     },
-    async jwt({ token, user }: { token: JWT; user?: AdapterUser }) {
+    async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
       }
@@ -39,8 +33,4 @@ const authOptions: NextAuthConfig = {
     maxAge: 30 * 24 * 60 * 60,
   },
   secret: process.env.AUTH_SECRET!,
-};
-
-const { handlers } = NextAuth(authOptions);
-
-export const { GET, POST } = handlers;
+});

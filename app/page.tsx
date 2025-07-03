@@ -3,7 +3,7 @@ import LoginButton from '@/components/login-button';
 import AddBookmarkForm from '@/components/add-bookmark-form';
 import BookmarkListDisplay from '@/components/bookmark-list-display';
 
-import { auth } from '@/app/api/auth/[...nextauth]/route';
+import { auth } from '@/lib/auth';
 
 export default async function HomePage() {
   const session = await auth();
