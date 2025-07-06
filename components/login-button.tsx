@@ -17,7 +17,7 @@ export default function LoginButton() {
 
   if (status === 'unauthenticated' || !session || !session.user) {
     return (
-      <Button onClick={() => signIn('github')} variant="default">
+      <Button onClick={() => signIn('google')} variant="default">
         Sign in with GitHub
       </Button>
     );
