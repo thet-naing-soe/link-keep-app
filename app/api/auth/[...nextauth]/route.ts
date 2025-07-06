@@ -28,6 +28,7 @@ const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: '/signin',
+    error: '/api/auth/error',
   },
   session: {
     strategy: 'jwt',
