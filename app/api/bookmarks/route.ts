@@ -38,7 +38,7 @@ export async function POST(req: Request) {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function GET(_req: Request) {
   try {
-    const session = await auth();
+    const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
       return new NextResponse('Unauthorized', { status: 401 });
     }
