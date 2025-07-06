@@ -3,10 +3,11 @@ import LoginButton from '@/components/login-button';
 import AddBookmarkForm from '@/components/add-bookmark-form';
 import BookmarkListDisplay from '@/components/bookmark-list-display';
 
-import { auth } from '@/lib/auth';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/lib/auth';
 
 export default async function HomePage() {
-  const session = await auth();
+  const session = await getServerSession(authOptions);
 
   return (
     <>
