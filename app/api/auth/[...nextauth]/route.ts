@@ -1,19 +1,18 @@
+// app/api/auth/[...nextauth]/route.ts
 import NextAuth from 'next-auth';
 import type { NextAuthOptions } from 'next-auth';
 import GitHub from 'next-auth/providers/github';
 import { PrismaAdapter } from '@next-auth/prisma-adapter';
 import { prisma } from '@/lib/prisma';
 
-const authOptions: NextAuthOptions = {
+export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
-
   providers: [
     GitHub({
       clientId: process.env.AUTH_GITHUB_ID!,
       clientSecret: process.env.AUTH_GITHUB_SECRET!,
     }),
   ],
-
   callbacks: {
     async session({ session, token }) {
       if (session.user && token?.id) {
@@ -28,19 +27,17 @@ const authOptions: NextAuthOptions = {
       return token;
     },
   },
-
   pages: {
     signIn: '/signin',
     error: '/api/auth/error',
   },
-
   session: {
     strategy: 'jwt',
     maxAge: 30 * 24 * 60 * 60,
   },
-
   secret: process.env.AUTH_SECRET!,
   debug: process.env.NODE_ENV === 'development',
 };
 
-export const { GET, POST } = NextAuth(authOptions);
+const handler = NextAuth(authOptions);
+export { handler as GET, handler as POST };
