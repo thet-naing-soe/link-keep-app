@@ -3,11 +3,7 @@ import { inter } from '@/lib/fonts';
 import './globals.css';
 
 import { cn } from '@/lib/utils';
-import { ThemeProvider } from '@/components/theme-provider';
-
-import { SessionProvider } from 'next-auth/react';
-
-import QueryProvider from '@/components/query-provider';
+import { Providers } from '@/components/providers';
 
 import { Toaster } from '@/components/ui/sonner';
 import { ConfirmationDialog } from '@/components/confirmation-dialog';
@@ -31,22 +27,10 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={cn(`${inter.variable} antialiased`)}>
-        <QueryProvider>
-          <SessionProvider>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="system"
-              enableSystem
-              disableTransitionOnChange
-            >
-              {children}
-            </ThemeProvider>
-          </SessionProvider>
-        </QueryProvider>
+        <Providers>{children}</Providers>
         <Toaster />
         <ConfirmationDialog />
       </body>
