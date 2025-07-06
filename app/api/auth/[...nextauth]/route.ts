@@ -26,6 +26,9 @@ const authOptions: NextAuthOptions = {
       return token;
     },
   },
+  pages: {
+    signIn: '/signin',
+  },
   session: {
     strategy: 'jwt',
     maxAge: 30 * 24 * 60 * 60,
