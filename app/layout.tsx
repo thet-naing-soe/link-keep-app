@@ -6,7 +6,8 @@ import { cn } from '@/lib/utils';
 import { ThemeProvider } from '@/components/theme-provider';
 
 import { SessionProvider } from 'next-auth/react';
-import { auth } from '@/lib/auth';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/lib/auth';
 
 import QueryProvider from '@/components/query-provider';
 
@@ -32,7 +33,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await auth();
+  const session = await getServerSession(authOptions);
 
   return (
     <html lang="en" suppressHydrationWarning>
