@@ -26,10 +26,6 @@ const authOptions: NextAuthOptions = {
       return token;
     },
   },
-  pages: {
-    signIn: '/signin',
-    error: '/api/auth/error',
-  },
   session: {
     strategy: 'jwt',
     maxAge: 30 * 24 * 60 * 60,
