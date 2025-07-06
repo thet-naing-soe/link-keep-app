@@ -6,8 +6,6 @@ import { cn } from '@/lib/utils';
 import { ThemeProvider } from '@/components/theme-provider';
 
 import { SessionProvider } from 'next-auth/react';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/lib/auth';
 
 import QueryProvider from '@/components/query-provider';
 
@@ -28,18 +26,17 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await getServerSession(authOptions);
 
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={cn(`${inter.variable} antialiased`)}>
         <QueryProvider>
-          <SessionProvider session={session}>
+          <SessionProvider>
             <ThemeProvider
               attribute="class"
               defaultTheme="system"
